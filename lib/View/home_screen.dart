@@ -11,30 +11,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final assetsAudioPlayer = AssetsAudioPlayer();
-  List<AudioInfo> audioList = List.generate(7,
-        (index) => AudioInfo("assets/audios/note${index + 1}.mp3",
-        false),
+  List<AudioInfo> audioList = List.generate(
+    7,
+    (index) => AudioInfo("assets/audios/note${index + 1}.mp3", false),
   );
 
   @override
-  void initState() {
-    super.initState();
-
-    // Load the audio file
-    for (var audioInfo in audioList) {
-      assetsAudioPlayer.open(Audio(audioInfo.filename));
-    }
-
-    // Listen to player state changes
-    assetsAudioPlayer.playlistAudioFinished.listen((finished) {
-      setState(() {
-        for (var audioInfo in audioList) {
-          audioInfo.isPlaying = false;
-        }
-      });
-    });
-  }
-
   void playAudio(int index) {
     assetsAudioPlayer.stop();
     assetsAudioPlayer.open(Audio(audioList[index].filename));
@@ -56,40 +38,52 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // void togglePlayPause() {
-  //   if (isPlaying) {
-  //     assetsAudioPlayer.pause();
-  //   } else {
-  //     assetsAudioPlayer.play();
-  //   }
-  //
-  //   setState(() {
-  //     isPlaying = !isPlaying;
-  //   });
-  // }
+  final List<Color> rainbowColors = [
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.indigo,
+    Colors.purple,
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.black26,
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-          ),
-        ),
-        child: Center(
+        color: Colors.black,
+        child: SafeArea(
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-            const SizedBox(height: 20),
-            for (int i = 0; i < audioList.length; i++)
-            ElevatedButton(
-              onPressed: audioList[i].isPlaying ? pauseAudio : () => playAudio(i),
-              child: Text(audioList[i].isPlaying ? 'Pause' : 'Play Note ${i + 1}'),
+            children: List.generate(
+              audioList.length,
+              (index) => Expanded(
+                child: GestureDetector(
+                  onTap: () => audioList[index].isPlaying
+                      ? pauseAudio()
+                      : playAudio(index),
+                  child: Container(
+                    color: rainbowColors[index % rainbowColors.length],
+                    child: Center(
+                      child: ElevatedButton(
+                          style: const ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.transparent)),
+
+                              onPressed: audioList[index].isPlaying
+                            ? pauseAudio
+                            : () => playAudio(index),
+                        child: Icon(
+                          audioList[index].isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: rainbowColors[index % rainbowColors.length],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ]),
+          ),
         ),
       ),
     );
